@@ -6,12 +6,11 @@ using System.Threading.Tasks;
 
 namespace Drink.Common.Models
 {
-    public class Drink
+    public interface IDrink
     {
         public int Id { get; set; }
         public string Name { get; set; }
         public string Image { get; set; }
         public string Description { get; set; }
-        public DrinkType DrinkType { get; set; }
     }
 }

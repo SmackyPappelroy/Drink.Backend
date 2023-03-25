@@ -2,7 +2,10 @@
 {
     public enum OperationType
     {
-        GetWine,
-        GetRecipes
+        GetWines,
+        GetRecipes,
+        GetBeers,
+        GetCocktails,
+        GetRecommendations
     }
 }

@@ -36,7 +36,6 @@ namespace Drink.API.Clients
             Config config,
             params object[] fields)
         {
-
             var httpRequest = new HttpRequestMessage(httpMethod, url);
             httpRequest.Headers.Accept.Clear();
             httpRequest.Headers.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
@@ -51,10 +50,16 @@ namespace Drink.API.Clients
                 case OperationType.GetRecipes:
                     return string.Format(config.ApiUris.RandomRecipes, config.SpoonacularApiKey);
 
-                case OperationType.GetWine:
+                case OperationType.GetWines:
                     return string.Format(
                         string.Concat(config.ApiUris.WinePairing, config.SpoonacularApiKey),
                         fields);
+
+                case OperationType.GetBeers:
+                    return string.Format(config.ApiUris.GetBeers, fields);
+
+                case OperationType.GetCocktails:
+                    return config.ApiUris.GetCocktails;
 
                 default:
                     return string.Empty;

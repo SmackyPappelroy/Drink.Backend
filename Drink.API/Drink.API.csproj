@@ -4,6 +4,7 @@
     <TargetFramework>net7.0</TargetFramework>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
+    <UserSecretsId>db9f587e-b792-4d42-8d66-91c41541ead1</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
@@ -18,10 +19,6 @@
   <ItemGroup>
     <ProjectReference Include="..\Drink.Common\Drink.Common.csproj" />
     <ProjectReference Include="..\Drink.Database\Drink.Database.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Folder Include="Controllers\" />
   </ItemGroup>
 
 </Project>

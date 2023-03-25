@@ -80,6 +80,7 @@ namespace Drink.API.Clients
             {
                 throw new ArgumentException($"The deserializedObject is null in {response.RequestMessage.RequestUri.LocalPath}");
             }
+
             return deserializedObject;
         }
 

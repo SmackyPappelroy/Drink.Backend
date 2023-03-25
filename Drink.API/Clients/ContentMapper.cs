@@ -10,7 +10,7 @@ namespace Drink.API.Clients
             return new DrinkDTO
             {
                 Name = drink.Name,
-                DrinkType= type,
+                DrinkType = type,
                 Description = drink.Description,
                 Image = drink.Image
             };

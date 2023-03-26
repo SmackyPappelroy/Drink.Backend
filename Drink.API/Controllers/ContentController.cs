@@ -14,6 +14,7 @@ namespace Drink.API.Controllers
     {
         private readonly IDbService _db;
         private readonly IContentClient foodClient;
+        private static RecipeResponse? recipes;
 
         public ContentController(IDbService db, IContentClient foodClient)
         {
@@ -26,7 +27,8 @@ namespace Drink.API.Controllers
         {
             try
             {
-                var recipes = await foodClient.SendGetAsync<RecipeResponse>(OperationType.GetRecipes, null);
+                 if (recipes == null)
+                    recipes = await foodClient.SendGetAsync<RecipeResponse>(OperationType.GetRecipes, null);
 
                 //TODO Map to DTO
                 //TODO: Retrieve pairings

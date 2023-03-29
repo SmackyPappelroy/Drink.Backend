@@ -1,8 +1,4 @@
-using Drink.API;
-using Drink.API.Clients;
-using Drink.API.Extensions;
 using Drink.Database.Contexts;
-using Drink.Database.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -13,15 +9,11 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-builder.Services.AddOptions<Config>()
-                .Bind(builder.Configuration.GetSection("Config"));
-builder.Services.AddHttpClient("ContentClient");
-builder.Services.AddSingleton<IContentClient, ContentClient>();
 
 builder.Services.AddDbContext<DishDrinkContext>(
 options => options.UseSqlServer(
-builder.Configuration.GetConnectionString("DrinkConnection")));
-builder.Services.AddScoped<IDbService, DbService>();
+ builder.Configuration.GetConnectionString("DrinkConnection")));
+
 
 var app = builder.Build();
 

@@ -1,5 +1,6 @@
 using Drink.API;
 using Drink.API.Clients;
+using Drink.API.Controllers;
 using Drink.API.Extensions;
 using Drink.Database.Contexts;
 using Drink.Database.Services;
@@ -16,12 +17,16 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddOptions<Config>()
                 .Bind(builder.Configuration.GetSection("Config"));
 builder.Services.AddHttpClient("ContentClient");
-builder.Services.AddSingleton<IContentClient, ContentClient>();
+
+builder.Services.AddSingleton<IContentController, ContentController>();
 
 builder.Services.AddDbContext<DishDrinkContext>(
 options => options.UseSqlServer(
 builder.Configuration.GetConnectionString("DrinkConnection")));
-builder.Services.AddScoped<IDbService, DbService>();
+//TODO change to Scoped when removing contentClient
+builder.Services.AddSingleton<IDbService, DbService>();
+//TODO remove IController when no longer needed
+builder.Services.AddSingleton<IContentClient, ContentClient>();
 
 var app = builder.Build();
 

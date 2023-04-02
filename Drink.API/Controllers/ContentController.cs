@@ -10,7 +10,7 @@ namespace Drink.API.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ContentController : ControllerBase
+    public class ContentController : ControllerBase, IContentController
     {
         private readonly IDbService _db;
         private readonly IContentClient foodClient;
@@ -23,28 +23,56 @@ namespace Drink.API.Controllers
         }
 
         [HttpGet("import-food")]
-        public async Task<object> ImportRecipes()
+        public async Task<IEnumerable<DishDTO>> ImportRecipes()
         {
             try
             {
-                 if (recipes == null)
+                if (recipes == null)
                     recipes = await foodClient.SendGetAsync<RecipeResponse>(OperationType.GetRecipes, null);
+
+                var mapped = recipes.Recipes.Select(async recipe => await MapDishAsync(recipe));
 
                 //TODO Map to DTO
                 //TODO: Retrieve pairings
                 //TODO: Save recipe and pairing to Db
 
-                return recipes; //change to return Ok response or mapped recipes
+                return await Task.WhenAll(mapped); ; //change to return Ok response or mapped recipes
             }
             catch
             {
             }
 
-            return Results.NotFound();
+            return Enumerable.Empty<DishDTO>();
+        }
+
+        private async Task<DishDTO> MapDishAsync(Recipe recipe)
+        {
+            var drinks = await ImportBeers(1, 2);
+
+            return new DishDTO
+            {
+                Id = recipe.Id,
+                Title = recipe.Title,
+                Servings = recipe.Servings,
+                Image = recipe.Image,
+                ReadyInMinutes = recipe.ReadyInMinutes,
+                Cheap = recipe.Cheap,
+                Cuisines = recipe.Cuisines,
+                GlutenFree = recipe.GlutenFree,
+                DairyFree = recipe.DairyFree,
+                Ketogenic = recipe.Ketogenic,
+                Vegan = recipe.Vegan,
+                Vegetarian = recipe.Vegetarian,
+                VeryHealthy = recipe.VeryHealthy,
+                Instructions = recipe.Instructions,
+                DishTypes = recipe.DishTypes,
+                Ingredients = string.Join(',', recipe.ExtendedIngredients.Select(ing => ing.Original)),
+                Drinks = drinks.Take(5)
+            };
         }
 
         [HttpGet("import-beer/{startPage}/{endPage}")]
-        public async Task<object> ImportBeers([FromRoute] int startPage, [FromRoute] int endPage)
+        public async Task<IEnumerable<DrinkDTO>> ImportBeers([FromRoute] int startPage, [FromRoute] int endPage)
         {
             try
             {
@@ -58,17 +86,17 @@ namespace Drink.API.Controllers
                     //TODO Save to Db
                 }
 
-                return true;
+                return drinks;
             }
             catch
             {
             }
 
-            return Results.NotFound();
+            return Enumerable.Empty<DrinkDTO>();
         }
 
         [HttpGet("import-cocktails/{quantity}")]
-        public async Task<object> ImportCocktails([FromRoute] int quantity)
+        public async Task<IEnumerable<DrinkDTO>> ImportCocktails([FromRoute] int quantity)
         {
             try
             {
@@ -86,13 +114,13 @@ namespace Drink.API.Controllers
                 var drinks = cocktails.Select(cocktail => ContentMapper.MapToDrink(cocktail, DrinkType.Cocktail));
                 //TODO Save to Db
 
-                return true;
+                return drinks;
             }
             catch
             {
             }
 
-            return Results.NotFound();
+            return Enumerable.Empty<DrinkDTO>();
         }
     }
 }

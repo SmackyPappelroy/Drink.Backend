@@ -23,5 +23,6 @@ public class DishDTO
     [JsonIgnore]
     public IEnumerable<Ingredient> ExtendedIngredients { get; set; }
     public string Instructions { get; set; }
-    public IEnumerable<string> Ingredients { get; set; }
+    public string Ingredients { get; set; }
+    public IEnumerable<DrinkDTO> Drinks { get; set;}
 }

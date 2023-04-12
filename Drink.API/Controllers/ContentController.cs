@@ -36,7 +36,7 @@ namespace Drink.API.Controllers
                 //TODO: Retrieve pairings
                 //TODO: Save recipe and pairing to Db
 
-                return await Task.WhenAll(mapped); ; //change to return Ok response or mapped recipes
+                return await Task.WhenAll(mapped); //change to return Ok response or mapped recipes
             }
             catch
             {
@@ -57,7 +57,7 @@ namespace Drink.API.Controllers
                 Image = recipe.Image,
                 ReadyInMinutes = recipe.ReadyInMinutes,
                 Cheap = recipe.Cheap,
-                Cuisines = recipe.Cuisines,
+                Cuisines = null,
                 GlutenFree = recipe.GlutenFree,
                 DairyFree = recipe.DairyFree,
                 Ketogenic = recipe.Ketogenic,
@@ -65,7 +65,7 @@ namespace Drink.API.Controllers
                 Vegetarian = recipe.Vegetarian,
                 VeryHealthy = recipe.VeryHealthy,
                 Instructions = recipe.Instructions,
-                DishTypes = recipe.DishTypes,
+                DishTypes = null,
                 Ingredients = string.Join(',', recipe.ExtendedIngredients.Select(ing => ing.Original)),
                 Drinks = drinks.Take(5)
             };
@@ -112,7 +112,11 @@ namespace Drink.API.Controllers
 
                 cocktails.ForEach(cocktail => cocktail.GetDescription());
                 var drinks = cocktails.Select(cocktail => ContentMapper.MapToDrink(cocktail, DrinkType.Cocktail));
-                //TODO Save to Db
+
+                var tasks = drinks.Select(dto => _db.AddAsync<Database.Entities.Drink, DrinkDTO>(dto));
+                await Task.WhenAll(tasks);
+
+                var success = await _db.SaveChangesAsync();
 
                 return drinks;
             }

@@ -82,8 +82,7 @@ namespace Drink.API.Controllers
                 for (int i = startPage; i < endPage; i++)
                 {
                     beers = (await foodClient.SendGetAsync<IEnumerable<Beer>>(OperationType.GetBeers, i)).ToList();
-                    drinks = beers.Select(beer => ContentMapper.MapToDrink(beer, DrinkType.Beer)).ToList();
-                    //TODO Save to Db
+                    drinks.AddRange(await MapAndSaveDrink(beers, DrinkType.Beer));
                 }
 
                 return drinks;
@@ -111,12 +110,9 @@ namespace Drink.API.Controllers
                 }
 
                 cocktails.ForEach(cocktail => cocktail.GetDescription());
-                var drinks = cocktails.Select(cocktail => ContentMapper.MapToDrink(cocktail, DrinkType.Cocktail));
 
-                var tasks = drinks.Select(dto => _db.AddAsync<Database.Entities.Drink, DrinkDTO>(dto));
-                await Task.WhenAll(tasks);
-
-                var success = await _db.SaveChangesAsync();
+                var drinks = await MapAndSaveDrink(cocktails, DrinkType.Cocktail);
+                
 
                 return drinks;
             }
@@ -125,6 +121,19 @@ namespace Drink.API.Controllers
             }
 
             return Enumerable.Empty<DrinkDTO>();
+        }
+
+        private async Task<IEnumerable<DrinkDTO>> MapAndSaveDrink(IEnumerable<IDrink> iDrinks, DrinkType type)
+        {
+            var drinks = iDrinks.Select(cocktail => ContentMapper.MapToDrink(cocktail, type));
+
+            var tasks = drinks.Select(dto => _db.AddAsync<Database.Entities.Drink, DrinkDTO>(dto));
+
+            await Task.WhenAll(tasks);
+
+            await _db.SaveChangesAsync();
+
+            return drinks;
         }
     }
 }

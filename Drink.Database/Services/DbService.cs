@@ -24,6 +24,7 @@ namespace Drink.Database.Services
             where TEntity : class
             where TDto : class
         {
+            _db.ChangeTracker.Clear();
             var entity = _mapper.Map<TEntity>(dto);
             await _db.Set<TEntity>().AddAsync(entity);
 
@@ -51,6 +52,13 @@ namespace Drink.Database.Services
         where TDto : class
         {
             var entities = await _db.Set<TEntity>().Where(expression).ToListAsync();
+            return _mapper.Map<List<TDto>>(entities);
+        }
+
+        async Task<List<TDto>> IDbService.GetAsync<TEntity, TDto>()
+        {
+            var entities = await _db.Set<TEntity>().ToListAsync();
+
             return _mapper.Map<List<TDto>>(entities);
         }
     }

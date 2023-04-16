@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Drink.Database.Migrations
 {
     [DbContext(typeof(DishDrinkContext))]
-    [Migration("20230411214011_init")]
+    [Migration("20230416162720_init")]
     partial class init
     {
         /// <inheritdoc />
@@ -217,6 +217,9 @@ namespace Drink.Database.Migrations
                     b.Property<string>("Original")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("SecondaryId")
+                        .HasColumnType("int");
 
                     b.HasKey("Id");
 

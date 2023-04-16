@@ -2,6 +2,7 @@ using AutoMapper;
 using Drink.API;
 using Drink.API.Clients;
 using Drink.API.Controllers;
+using Drink.API.Services;
 using Drink.Common.DTOs;
 using Drink.Database.Contexts;
 using Drink.Database.Entities;
@@ -20,13 +21,13 @@ builder.Services.AddOptions<Config>()
                 .Bind(builder.Configuration.GetSection("Config"));
 builder.Services.AddHttpClient("ContentClient");
 
-builder.Services.AddDbContext<DishDrinkContext>(
+builder.Services.AddTransient<DishDrinkContext>(
 options => options.UseSqlServer(
 builder.Configuration.GetConnectionString("DrinkConnection")));
 ConfigureAutomapper(builder.Services);
 builder.Services.AddScoped<IDbService, DbService>();
 builder.Services.AddSingleton<IContentClient, ContentClient>();
-builder.Services.AddScoped<IContentController, ContentController>();
+builder.Services.AddScoped<IContentService, ContentService>();
 
 var app = builder.Build();
 

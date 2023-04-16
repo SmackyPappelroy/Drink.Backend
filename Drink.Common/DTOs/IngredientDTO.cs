@@ -9,5 +9,6 @@ namespace Drink.Common.DTOs
 {
     public class IngredientDTO : Ingredient
     {
+        public int Id { get; set; }
     }
 }

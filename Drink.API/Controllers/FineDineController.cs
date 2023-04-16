@@ -7,13 +7,6 @@ namespace Drink.API.Controllers
 {
     public class MainWebsiteController : ControllerBase
     {
-        public IContentController content;
-
-        public MainWebsiteController(IContentController content)
-        {
-            this.content = content;
-        }
-
         [HttpGet("get-recipes/page/{page}/pageSize/{pageSize}")]
         public async Task<IEnumerable<DishDTO>> GetRecipes([FromRoute] int page, [FromRoute] int pageSize, [FromQuery] bool glutenFree,
             [FromQuery] bool dairyFree, [FromQuery] bool keto, [FromQuery] bool vegetarian, [FromQuery] bool vegan, [FromQuery] bool cheap,
@@ -21,7 +14,7 @@ namespace Drink.API.Controllers
         {
             try
             {
-                return (await content.ImportRecipes()).Take(pageSize);
+                return Enumerable.Empty<DishDTO>();
             }
             catch
             {

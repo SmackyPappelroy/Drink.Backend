@@ -21,7 +21,7 @@ builder.Services.AddOptions<Config>()
                 .Bind(builder.Configuration.GetSection("Config"));
 builder.Services.AddHttpClient("ContentClient");
 
-builder.Services.AddTransient<DishDrinkContext>(
+builder.Services.AddDbContext<DishDrinkContext>(
 options => options.UseSqlServer(
 builder.Configuration.GetConnectionString("DrinkConnection")));
 ConfigureAutomapper(builder.Services);

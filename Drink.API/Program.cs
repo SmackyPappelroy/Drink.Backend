@@ -8,6 +8,7 @@ using Drink.Database.Contexts;
 using Drink.Database.Entities;
 using Drink.Database.Services;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,6 +29,8 @@ ConfigureAutomapper(builder.Services);
 builder.Services.AddScoped<IDbService, DbService>();
 builder.Services.AddSingleton<IContentClient, ContentClient>();
 builder.Services.AddScoped<IContentService, ContentService>();
+builder.Services.AddControllers().AddJsonOptions(x =>
+                x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 
 var app = builder.Build();
 

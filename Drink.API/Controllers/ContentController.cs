@@ -25,7 +25,7 @@ namespace Drink.API.Controllers
         }
 
         [HttpGet("import-food")]
-        public async Task<IEnumerable<Dish>> ImportRecipes()
+        public async Task<IEnumerable<DishDTO>> ImportRecipes()
         {
             try
             {
@@ -35,7 +35,7 @@ namespace Drink.API.Controllers
             }
             catch
             {
-                return Enumerable.Empty<Dish>();
+                return Enumerable.Empty<DishDTO>();
             }
         }
 

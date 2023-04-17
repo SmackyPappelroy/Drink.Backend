@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Drink.Database.Migrations
 {
     [DbContext(typeof(DishDrinkContext))]
-    [Migration("20230416162720_init")]
+    [Migration("20230417162517_init")]
     partial class init
     {
         /// <inheritdoc />
@@ -59,6 +59,10 @@ namespace Drink.Database.Migrations
                         .HasColumnType("bit");
 
                     b.Property<string>("Image")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Ingredients")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 

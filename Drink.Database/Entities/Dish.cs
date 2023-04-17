@@ -20,6 +20,6 @@ public class Dish : IEntity
     public ICollection<DishType> DishTypes { get; set; }
     public ICollection<Ingredient> ExtendedIngredients { get; set; }
     public string Instructions { get; set; }
-    //TODO public string Ingredients { get; set; }
+    public string Ingredients { get; set; }
     public ICollection<Drink> Drinks { get; set; }
 }

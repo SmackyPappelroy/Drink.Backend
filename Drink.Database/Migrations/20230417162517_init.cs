@@ -40,7 +40,8 @@ namespace Drink.Database.Migrations
                     Vegan = table.Column<bool>(type: "bit", nullable: false),
                     Vegetarian = table.Column<bool>(type: "bit", nullable: false),
                     VeryHealthy = table.Column<bool>(type: "bit", nullable: false),
-                    Instructions = table.Column<string>(type: "nvarchar(max)", nullable: false)
+                    Instructions = table.Column<string>(type: "nvarchar(max)", nullable: false),
+                    Ingredients = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
                 constraints: table =>
                 {

@@ -16,19 +16,23 @@ namespace Drink.API.Services
             _db = db;
         }
 
-        public async Task<IEnumerable<Dish>> MapAndSaveDishesAsync(IEnumerable<Recipe> recipes)
+        public async Task<IEnumerable<DishDTO>> MapAndSaveDishesAsync(IEnumerable<Recipe> recipes)
         {
-            var drinks = await GetDrinks();
-
             var random = new Random();
 
-            List<Dish> dishes = new();
+            List<DishDTO> dishes = new();
+            var filteredRecipes = recipes.Where(r => r.ExtendedIngredients.Any(ing => ing.SecondaryId != -1))
+                                         .Where(r => r.Image is not null);
 
-            foreach (var recipe in recipes.Where(r => r.ExtendedIngredients.Any(ing => ing.SecondaryId != -1)))
+            foreach (var recipe in filteredRecipes)
             {
-                var r = await MapDishAsync(recipe, drinks, random);
-                var d = await _db.AddAsync<Dish, DishDTO>(r);
-                dishes.Add(d);
+                await SaveCuisinesAndDishTypesAsync(recipe);
+
+                await SaveIngredientsAsync(recipe.ExtendedIngredients);
+
+                var r = await MapDishAsync(recipe);
+                var d = await _db.AddDishAsync(r, recipe, random);
+                dishes.Add(r);
             }
 
             await _db.SaveChangesAsync();
@@ -36,12 +40,8 @@ namespace Drink.API.Services
             return dishes;
         }
 
-        public async Task<DishDTO> MapDishAsync(Recipe recipe, IEnumerable<DrinkDTO> drinks, Random random)
+        public async Task<DishDTO> MapDishAsync(Recipe recipe)
         {
-            (var cuisines, var dishTypes) = await GetCuisinesAndDishTypesAsync(recipe);
-
-            var extendedIngredients = await GetIngredientsAsync(recipe.ExtendedIngredients);
-
             return new DishDTO
             {
                 Title = recipe.Title,
@@ -49,7 +49,6 @@ namespace Drink.API.Services
                 Image = recipe.Image,
                 ReadyInMinutes = recipe.ReadyInMinutes,
                 Cheap = recipe.Cheap,
-                Cuisines = cuisines.Where(c => recipe.Cuisines.Contains(c.Name)),
                 GlutenFree = recipe.GlutenFree,
                 DairyFree = recipe.DairyFree,
                 Ketogenic = recipe.Ketogenic,
@@ -57,32 +56,26 @@ namespace Drink.API.Services
                 Vegetarian = recipe.Vegetarian,
                 VeryHealthy = recipe.VeryHealthy,
                 Instructions = recipe.Instructions,
-                DishTypes = dishTypes.Where(d => recipe.DishTypes.Contains(d.Name)),
-                ExtendedIngredients = extendedIngredients,
-                Ingredients = string.Join('*', recipe.ExtendedIngredients.Select(ing => ing.Original)),
-                Drinks = drinks.OrderBy(x => random.Next()).Take(8)
+                Ingredients = string.Join('*', recipe.ExtendedIngredients.Select(ing => ing.Original))
             };
         }
 
-        private async Task<IEnumerable<IngredientDTO>> GetIngredientsAsync(IEnumerable<Common.Models.Ingredient> extendedIngredients)
+        private async Task SaveIngredientsAsync(IEnumerable<Common.Models.Ingredient> extendedIngredients)
         {
             List<IngredientDTO> ingredients = new();
 
             foreach (var ing in extendedIngredients)
             {
-                var ingredient = await GetOrCreateIngredientAsync(ing);
-                ingredients.Add(ingredient);
+                await GetOrCreateIngredientAsync(ing);
             }
-
-            return ingredients;
         }
 
-        private async Task<IngredientDTO> GetOrCreateIngredientAsync(Common.Models.Ingredient ing)
+        private async Task GetOrCreateIngredientAsync(Common.Models.Ingredient ing)
         {
             var ingredient = (await _db.GetAsync<Database.Entities.Ingredient, IngredientDTO>(e => e.SecondaryId.Equals(ing.SecondaryId))).FirstOrDefault();
 
             if (ingredient is not null)
-                return ingredient;
+                return;
 
             var dto = new IngredientDTO
             {
@@ -95,11 +88,9 @@ namespace Drink.API.Services
             ingredient = await _db.AddAsync<Database.Entities.Ingredient, IngredientDTO>(dto);
 
             await _db.SaveChangesAsync();
-
-            return ingredient;
         }
 
-        private async Task<(IEnumerable<CuisineDTO>, IEnumerable<DishTypeDTO>)> GetCuisinesAndDishTypesAsync(Recipe recipe)
+        private async Task SaveCuisinesAndDishTypesAsync(Recipe recipe)
         {
             var cuisines = await GetCuisines();
             var cuisinesToSave = recipe.Cuisines.Where(cuisine => !cuisines.Select(c => c.Name).Contains(cuisine));
@@ -112,20 +103,16 @@ namespace Drink.API.Services
             await Task.WhenAll(taskD);
 
             await _db.SaveChangesAsync();
-
-            cuisines = await GetCuisines();
-            dishTypes = await GetDishTypes();
-
-            return (cuisines, dishTypes);
         }
 
         public async Task<IEnumerable<DrinkDTO>> MapAndSaveDrinkAsync(IEnumerable<IDrink> iDrinks, DrinkType type)
         {
             var drinks = iDrinks.Select(cocktail => ContentMapper.MapToDrink(cocktail, type));
 
-            var tasks = drinks.Select(dto => _db.AddAsync<Database.Entities.Drink, DrinkDTO>(dto));
-
-            await Task.WhenAll(tasks);
+            foreach (var drink in drinks)
+            {
+                await _db.AddAsync<Database.Entities.Drink, DrinkDTO>(drink);
+            }
 
             await _db.SaveChangesAsync();
 

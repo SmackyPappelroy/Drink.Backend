@@ -1,10 +1,14 @@
+using AutoMapper;
 using Drink.API;
 using Drink.API.Clients;
 using Drink.API.Controllers;
-using Drink.API.Extensions;
+using Drink.API.Services;
+using Drink.Common.DTOs;
 using Drink.Database.Contexts;
+using Drink.Database.Entities;
 using Drink.Database.Services;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -18,15 +22,15 @@ builder.Services.AddOptions<Config>()
                 .Bind(builder.Configuration.GetSection("Config"));
 builder.Services.AddHttpClient("ContentClient");
 
-builder.Services.AddSingleton<IContentController, ContentController>();
-
 builder.Services.AddDbContext<DishDrinkContext>(
 options => options.UseSqlServer(
 builder.Configuration.GetConnectionString("DrinkConnection")));
-//TODO change to Scoped when removing contentClient
-builder.Services.AddSingleton<IDbService, DbService>();
-//TODO remove IController when no longer needed
+ConfigureAutomapper(builder.Services);
+builder.Services.AddScoped<IDbService, DbService>();
 builder.Services.AddSingleton<IContentClient, ContentClient>();
+builder.Services.AddScoped<IContentService, ContentService>();
+builder.Services.AddControllers().AddJsonOptions(x =>
+                x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 
 var app = builder.Build();
 
@@ -50,3 +54,22 @@ app.UseAuthorization();
 app.MapControllers();
 
 app.Run();
+
+static void ConfigureAutomapper(IServiceCollection services)
+{
+    var config = new MapperConfiguration(cfg =>
+    {
+        cfg.CreateMap<Cuisine, CuisineDTO>().ReverseMap();
+        cfg.CreateMap<Dish, DishDTO>().ReverseMap();
+        cfg.CreateMap<DishCuisine, DishCuisineDTO>().ReverseMap();
+        cfg.CreateMap<DishDishType, DishDishTypeDTO>().ReverseMap();
+        cfg.CreateMap<DishDrink, DishDrinkDTO>().ReverseMap();
+        cfg.CreateMap<DishIngredient, DishIngredientDTO>().ReverseMap();
+        cfg.CreateMap<DishType, DishTypeDTO>().ReverseMap();
+        cfg.CreateMap<Drink.Database.Entities.Drink, DrinkDTO>().ReverseMap();
+        cfg.CreateMap<Ingredient, IngredientDTO>().ReverseMap();
+
+    });
+    var mapper = config.CreateMapper();
+    services.AddSingleton(mapper);
+}

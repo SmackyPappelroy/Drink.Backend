@@ -78,22 +78,6 @@ namespace Drink.Database.Migrations
                 });
 
             migrationBuilder.CreateTable(
-                name: "Ingredients",
-                columns: table => new
-                {
-                    Id = table.Column<int>(type: "int", nullable: false)
-                        .Annotation("SqlServer:Identity", "1, 1"),
-                    SecondaryId = table.Column<int>(type: "int", nullable: false),
-                    Original = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Name = table.Column<string>(type: "nvarchar(max)", nullable: false),
-                    Image = table.Column<string>(type: "nvarchar(max)", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_Ingredients", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
                 name: "DishCuisine",
                 columns: table => new
                 {
@@ -165,30 +149,6 @@ namespace Drink.Database.Migrations
                         onDelete: ReferentialAction.Cascade);
                 });
 
-            migrationBuilder.CreateTable(
-                name: "DishIngredient",
-                columns: table => new
-                {
-                    DishId = table.Column<int>(type: "int", nullable: false),
-                    IngredientId = table.Column<int>(type: "int", nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_DishIngredient", x => new { x.DishId, x.IngredientId });
-                    table.ForeignKey(
-                        name: "FK_DishIngredient_Dishes_DishId",
-                        column: x => x.DishId,
-                        principalTable: "Dishes",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                    table.ForeignKey(
-                        name: "FK_DishIngredient_Ingredients_IngredientId",
-                        column: x => x.IngredientId,
-                        principalTable: "Ingredients",
-                        principalColumn: "Id",
-                        onDelete: ReferentialAction.Cascade);
-                });
-
             migrationBuilder.CreateIndex(
                 name: "IX_DishCuisine_CuisineId",
                 table: "DishCuisine",
@@ -203,11 +163,6 @@ namespace Drink.Database.Migrations
                 name: "IX_DishDrink_DrinkId",
                 table: "DishDrink",
                 column: "DrinkId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_DishIngredient_IngredientId",
-                table: "DishIngredient",
-                column: "IngredientId");
         }
 
         /// <inheritdoc />
@@ -223,22 +178,16 @@ namespace Drink.Database.Migrations
                 name: "DishDrink");
 
             migrationBuilder.DropTable(
-                name: "DishIngredient");
-
-            migrationBuilder.DropTable(
                 name: "Cuisines");
 
             migrationBuilder.DropTable(
                 name: "DishTypes");
 
             migrationBuilder.DropTable(
-                name: "Drinks");
-
-            migrationBuilder.DropTable(
                 name: "Dishes");
 
             migrationBuilder.DropTable(
-                name: "Ingredients");
+                name: "Drinks");
         }
     }
 }

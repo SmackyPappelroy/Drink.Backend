@@ -9,10 +9,8 @@ public class DishDrinkContext : DbContext
     public DbSet<DishCuisine> DishCuisines => Set<DishCuisine>();
     public DbSet<DishDishType> DishDishTypes => Set<DishDishType>();
     public DbSet<DishDrink> DishDrinks => Set<DishDrink>();
-    public DbSet<DishIngredient> DishIngredients => Set<DishIngredient>();
     public DbSet<DishType> DishTypes => Set<DishType>();
     public DbSet<Entities.Drink> Drinks => Set<Entities.Drink>();
-    public DbSet<Ingredient> Ingredients => Set<Ingredient>();
 
 
     public DishDrinkContext(DbContextOptions<DishDrinkContext> options) : base(options) { }
@@ -23,7 +21,6 @@ public class DishDrinkContext : DbContext
         /* Composite Keys */
         modelBuilder.Entity<DishDrink>().HasKey(ci => new { ci.DishId, ci.DrinkId });
         modelBuilder.Entity<DishDishType>().HasKey(dd => new { dd.DishId, dd.DishTypeId });
-        modelBuilder.Entity<DishIngredient>().HasKey(di => new { di.DishId, di.IngredientId });
         modelBuilder.Entity<DishCuisine>().HasKey(dc => new { dc.DishId, dc.CuisineId });
 
         /* Configuring related tables for the Dish table*/
@@ -33,11 +30,6 @@ public class DishDrinkContext : DbContext
                   .WithMany(p => p.Dishes)
                   .UsingEntity<DishCuisine>()
                   .ToTable("DishCuisine");
-
-            entity.HasMany(d => d.ExtendedIngredients)
-                  .WithMany(p => p.Dishes)
-                  .UsingEntity<DishIngredient>()
-                  .ToTable("DishIngredient");
 
             entity.HasMany(d => d.Drinks)
                   .WithMany(p => p.Dishes)

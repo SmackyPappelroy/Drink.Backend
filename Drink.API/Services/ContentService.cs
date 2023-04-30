@@ -24,23 +24,22 @@ namespace Drink.API.Services
             var filteredRecipes = recipes.Where(r => r.ExtendedIngredients.Any(ing => ing.SecondaryId != -1))
                                          .Where(r => r.Image is not null);
 
+            var drinks = _db.GetAllDrinks();
+
             foreach (var recipe in filteredRecipes)
             {
                 await SaveCuisinesAndDishTypesAsync(recipe);
 
-                await SaveIngredientsAsync(recipe.ExtendedIngredients);
-
-                var r = await MapDishAsync(recipe);
-                var d = await _db.AddDishAsync(r, recipe, random);
+                var r = MapDish(recipe);
+                var d = await _db.AddDishAsync(r, recipe, random, drinks);
                 dishes.Add(r);
+                await _db.SaveChangesAsync();
             }
-
-            await _db.SaveChangesAsync();
 
             return dishes;
         }
 
-        public async Task<DishDTO> MapDishAsync(Recipe recipe)
+        public DishDTO MapDish(Recipe recipe)
         {
             return new DishDTO
             {
@@ -58,36 +57,6 @@ namespace Drink.API.Services
                 Instructions = recipe.Instructions,
                 Ingredients = string.Join('*', recipe.ExtendedIngredients.Select(ing => ing.Original))
             };
-        }
-
-        private async Task SaveIngredientsAsync(IEnumerable<Common.Models.Ingredient> extendedIngredients)
-        {
-            List<IngredientDTO> ingredients = new();
-
-            foreach (var ing in extendedIngredients)
-            {
-                await GetOrCreateIngredientAsync(ing);
-            }
-        }
-
-        private async Task GetOrCreateIngredientAsync(Common.Models.Ingredient ing)
-        {
-            var ingredient = (await _db.GetAsync<Database.Entities.Ingredient, IngredientDTO>(e => e.SecondaryId.Equals(ing.SecondaryId))).FirstOrDefault();
-
-            if (ingredient is not null)
-                return;
-
-            var dto = new IngredientDTO
-            {
-                Name = ing.Name,
-                SecondaryId = ing.SecondaryId,
-                Image = ing.Image ?? "default.png",
-                Original = ing.Original
-            };
-
-            ingredient = await _db.AddAsync<Database.Entities.Ingredient, IngredientDTO>(dto);
-
-            await _db.SaveChangesAsync();
         }
 
         private async Task SaveCuisinesAndDishTypesAsync(Recipe recipe)
@@ -117,11 +86,6 @@ namespace Drink.API.Services
             await _db.SaveChangesAsync();
 
             return drinks;
-        }
-
-        private async Task<IEnumerable<DrinkDTO>> GetDrinks()
-        {
-            return await _db.GetAsync<Database.Entities.Drink, DrinkDTO>();
         }
 
         private async Task<IEnumerable<CuisineDTO>> GetCuisines()

@@ -73,12 +73,13 @@ namespace Drink.API.Controllers
             return Enumerable.Empty<DrinkDTO>();
         }
 
+
         [HttpGet("get-from-drink/{id}")]
         public async Task<IEnumerable<FineDish>> GetFromDrinkAsync([FromRoute] int id)
         {
             try
             {
-                var dishes = await _db.GetAsync<Dish, DishDTO>(d => d.Drinks.Any(drink => drink.Id == id));
+                var dishes = await _db.GetAsync<Dish, DishDTO> (d => d.Drinks.Any(drink => drink.Id == id));
 
                 return dishes.Select(d => MapperHelper.MapFineDish(d));
             }
@@ -87,6 +88,22 @@ namespace Drink.API.Controllers
             }
 
             return Enumerable.Empty<FineDish>();
+        }
+
+        [HttpGet("get-dish/{id}")]
+        public async Task<FineDish> GetDishAsync([FromRoute] int id)
+        {
+            try
+            {
+                var dishes = _db.GetInclude(d => d.Id == id);
+
+                return MapperHelper.MapFineDish(dishes.First());
+            }
+            catch
+            {
+            }
+
+            return new FineDish();
         }
 
         [HttpGet("get-from-ingredient/{ingredient}")]

@@ -12,7 +12,10 @@ namespace Drink.Database.Services
 {
     public interface IDbService
     {
-        Task<Dish> AddDishAsync(DishDTO dto, Recipe recipe, Random random);
+        Task<Dish> AddDishAsync(DishDTO dto, Recipe recipe, Random random, IEnumerable<Entities.Drink> drinks);
+
+        public List<DishDTO> GetInclude(
+        Expression<Func<Dish, bool>> expression);
 
         Task<TEntity> AddAsync<TEntity, TDto>(TDto dto)
             where TEntity : class
@@ -20,15 +23,13 @@ namespace Drink.Database.Services
 
         Task<bool> SaveChangesAsync();
 
-        Task<List<TDto>> GetAsync<TEntity, TDto>(string query)
-            where TEntity : class, IEntity
-            where TDto : class;
+        IEnumerable<Entities.Drink> GetAllDrinks();
 
         Task<List<TDto>> GetAsync<TEntity, TDto>() where TEntity : class, IEntity
             where TDto : class;
 
         Task<List<TDto>> GetAsync<TEntity, TDto>(Expression<Func<TEntity, bool>> expression)
-            where TEntity : class, IEntity
-            where TDto : class;
+        where TEntity : class, IEntity
+        where TDto : class;
     }
 }

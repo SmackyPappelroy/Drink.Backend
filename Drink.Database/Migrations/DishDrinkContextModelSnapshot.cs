@@ -139,21 +139,6 @@ namespace Drink.Database.Migrations
                     b.ToTable("DishDrink", (string)null);
                 });
 
-            modelBuilder.Entity("Drink.Database.Entities.DishIngredient", b =>
-                {
-                    b.Property<int>("DishId")
-                        .HasColumnType("int");
-
-                    b.Property<int>("IngredientId")
-                        .HasColumnType("int");
-
-                    b.HasKey("DishId", "IngredientId");
-
-                    b.HasIndex("IngredientId");
-
-                    b.ToTable("DishIngredient", (string)null);
-                });
-
             modelBuilder.Entity("Drink.Database.Entities.DishType", b =>
                 {
                     b.Property<int>("Id")
@@ -197,34 +182,6 @@ namespace Drink.Database.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Drinks");
-                });
-
-            modelBuilder.Entity("Drink.Database.Entities.Ingredient", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("int");
-
-                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Image")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Original")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<int>("SecondaryId")
-                        .HasColumnType("int");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Ingredients");
                 });
 
             modelBuilder.Entity("Drink.Database.Entities.DishCuisine", b =>
@@ -282,25 +239,6 @@ namespace Drink.Database.Migrations
                     b.Navigation("Dish");
 
                     b.Navigation("Drink");
-                });
-
-            modelBuilder.Entity("Drink.Database.Entities.DishIngredient", b =>
-                {
-                    b.HasOne("Drink.Database.Entities.Dish", "Dish")
-                        .WithMany()
-                        .HasForeignKey("DishId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.HasOne("Drink.Database.Entities.Ingredient", "Ingredient")
-                        .WithMany()
-                        .HasForeignKey("IngredientId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Dish");
-
-                    b.Navigation("Ingredient");
                 });
 #pragma warning restore 612, 618
         }

@@ -64,10 +64,8 @@ static void ConfigureAutomapper(IServiceCollection services)
         cfg.CreateMap<DishCuisine, DishCuisineDTO>().ReverseMap();
         cfg.CreateMap<DishDishType, DishDishTypeDTO>().ReverseMap();
         cfg.CreateMap<DishDrink, DishDrinkDTO>().ReverseMap();
-        cfg.CreateMap<DishIngredient, DishIngredientDTO>().ReverseMap();
         cfg.CreateMap<DishType, DishTypeDTO>().ReverseMap();
         cfg.CreateMap<Drink.Database.Entities.Drink, DrinkDTO>().ReverseMap();
-        cfg.CreateMap<Ingredient, IngredientDTO>().ReverseMap();
 
     });
     var mapper = config.CreateMapper();

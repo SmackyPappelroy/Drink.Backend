@@ -51,12 +51,35 @@ namespace Drink.API.Controllers
             return Enumerable.Empty<FineDish>();
         }
 
+        [HttpGet("get-drinks/page/{page}/pageSize/{pageSize}")]
+        public async Task<IEnumerable<DrinkDTO>> GetDrinks([FromRoute] int page, [FromRoute] int pageSize)
+        {
+            try
+            {
+                var drinks = await _db.GetAsync<Database.Entities.Drink, DrinkDTO>();
+
+                var chunked = drinks.Chunk(pageSize);
+
+                if (chunked.Count() < page)
+                    return Enumerable.Empty<DrinkDTO>();
+
+                return chunked.ElementAt(page - 1);
+            }
+
+            catch
+            {
+            }
+
+            return Enumerable.Empty<DrinkDTO>();
+        }
+
+
         [HttpGet("get-from-drink/{id}")]
         public async Task<IEnumerable<FineDish>> GetFromDrinkAsync([FromRoute] int id)
         {
             try
             {
-                var dishes = await _db.GetAsync<Dish, DishDTO>(d => d.Drinks.Any(drink => drink.Id == id));
+                var dishes = await _db.GetAsync<Dish, DishDTO> (d => d.Drinks.Any(drink => drink.Id == id));
 
                 return dishes.Select(d => MapperHelper.MapFineDish(d));
             }
@@ -67,12 +90,44 @@ namespace Drink.API.Controllers
             return Enumerable.Empty<FineDish>();
         }
 
+        [HttpGet("get-dish/{id}")]
+        public async Task<FineDish> GetDishAsync([FromRoute] int id)
+        {
+            try
+            {
+                var dishes = _db.GetInclude(d => d.Id == id);
+
+                return MapperHelper.MapFineDish(dishes.First());
+            }
+            catch
+            {
+            }
+
+            return new FineDish();
+        }
+
         [HttpGet("get-from-ingredient/{ingredient}")]
         public async Task<IEnumerable<FineDish>> GetFromIngredientAsync([FromRoute] string ingredient)
         {
             try
             {
                 var dishes = await _db.GetAsync<Dish, DishDTO>(d => d.Ingredients.Contains(ingredient));
+
+                return dishes.Select(d => MapperHelper.MapFineDish(d));
+            }
+            catch
+            {
+            }
+
+            return Enumerable.Empty<FineDish>();
+        }
+
+        [HttpGet("get-from-title/{title}")]
+        public async Task<IEnumerable<FineDish>> GetFromTitleAsync([FromRoute] string title)
+        {
+            try
+            {
+                var dishes = await _db.GetAsync<Dish, DishDTO>(d => d.Title.Contains(title));
 
                 return dishes.Select(d => MapperHelper.MapFineDish(d));
             }

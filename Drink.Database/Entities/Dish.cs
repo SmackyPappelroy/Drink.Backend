@@ -18,7 +18,6 @@ public class Dish : IEntity
     public bool Vegetarian { get; set; }
     public bool VeryHealthy { get; set; }
     public ICollection<DishType> DishTypes { get; set; }
-    public ICollection<Ingredient> ExtendedIngredients { get; set; }
     public string Instructions { get; set; }
     public string Ingredients { get; set; }
     public ICollection<Drink> Drinks { get; set; }

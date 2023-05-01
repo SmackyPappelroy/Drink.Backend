@@ -24,7 +24,7 @@ namespace Drink.Database.Services
             _mapper = mapper;
         }
 
-        public async Task<Dish> AddDishAsync(DishDTO dto, Recipe recipe, Random random)
+        public async Task<Dish> AddDishAsync(DishDTO dto, Recipe recipe, Random random, IEnumerable<Entities.Drink> drinks)
         {
             var entity = _mapper.Map<Dish>(dto);
             await _db.Set<Dish>().AddAsync(entity);
@@ -35,11 +35,7 @@ namespace Drink.Database.Services
             var types = _db.DishTypes.Where(t => recipe.DishTypes.Contains(t.Name));
             entity.DishTypes = types.ToList();
 
-            var drinks = _db.Drinks;
             entity.Drinks = drinks.ToList().OrderBy(x => random.Next()).Take(8).ToList();
-
-            var ingredients = _db.Ingredients.Where(i => recipe.ExtendedIngredients.Select(e => e.SecondaryId).Contains(i.SecondaryId));
-            entity.ExtendedIngredients = ingredients.ToList();
 
             return entity;
         }
@@ -54,14 +50,14 @@ namespace Drink.Database.Services
             return entity;
         }
 
-        public async Task<List<TDto>> GetAsync<TEntity, TDto>(
-        Expression<Func<TEntity, bool>> expression)
-        where TEntity : class, IEntity
-        where TDto : class
+        public List<DishDTO> GetInclude(Expression<Func<Dish, bool>> expression)
         {
-            Include<TEntity>();
-            var entities = await _db.Set<TEntity>().Where(expression).ToListAsync();
-            return _mapper.Map<List<TDto>>(entities);
+            var entities = _db.Dishes.Where(expression);
+            entities.Include("Drinks").Load();
+            entities.Include("DishTypes").Load();
+            entities.Include("Cuisines").Load();
+            entities.ToList();
+            return _mapper.Map<List<DishDTO>>(entities);
         }
 
         public async Task<bool> SaveChangesAsync()
@@ -69,40 +65,25 @@ namespace Drink.Database.Services
             return (await _db.SaveChangesAsync()) >= 0;
         }
 
-        public void Include<TEntity>() where TEntity : class
+        async Task<List<TDto>> IDbService.GetAsync<TEntity, TDto>()
         {
-            var entityType = _db.Model.FindEntityType(typeof(TEntity));
+            var entities = await _db.Set<TEntity>().ToListAsync();
 
-            if (entityType is null)
-                return;
-
-            var propertyNames = entityType.GetNavigations()
-                                           .Concat<INavigationBase>(entityType.GetSkipNavigations())
-                                           .Select(e => e.Name);
-
-            if (propertyNames is null) 
-                return;
-
-            foreach (var name in propertyNames)
-                _db.Set<TEntity>().Include(name).Load();
+            return _mapper.Map<List<TDto>>(entities);
         }
 
-        public async Task<List<TDto>> GetAsync<TEntity, TDto>(string query)
+        public async Task<List<TDto>> GetAsync<TEntity, TDto>(
+        Expression<Func<TEntity, bool>> expression)
         where TEntity : class, IEntity
         where TDto : class
         {
-            Include<TEntity>();
-            var entities = _db.Dishes.FromSqlRaw(query);
-
+            var entities = await _db.Set<TEntity>().Where(expression).ToListAsync();
             return _mapper.Map<List<TDto>>(entities);
         }
 
-        async Task<List<TDto>> IDbService.GetAsync<TEntity, TDto>()
+        public IEnumerable<Entities.Drink> GetAllDrinks()
         {
-            Include<TEntity>();
-            var entities = await _db.Set<TEntity>().ToListAsync();
- 
-            return _mapper.Map<List<TDto>>(entities);
+            return _db.Drinks;
         }
     }
 }
